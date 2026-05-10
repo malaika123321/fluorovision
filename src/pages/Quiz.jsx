@@ -53,6 +53,8 @@ function Quiz() {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       localStorage.setItem('quizAnswers', JSON.stringify(newAnswers));
+      // sessionStorage mein mark karo k quiz is session mein complete hui
+      sessionStorage.setItem('quizDoneThisSession', 'true');
       navigate('/upload');
     }
   };

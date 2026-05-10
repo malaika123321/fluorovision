@@ -1,54 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { FiCheckCircle, FiAlertTriangle, FiAlertOctagon, FiActivity, FiClock, FiCpu } from 'react-icons/fi';
+import { FiCheckCircle, FiAlertTriangle, FiAlertOctagon, FiActivity, FiClock } from 'react-icons/fi';
 
 function Results() {
   const { language } = useLanguage();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [photo, setPhoto] = useState(null);
-  const [apiUsed, setApiUsed] = useState(false);
-  const [confidence, setConfidence] = useState(null);
+  const [quizDone, setQuizDone] = useState(false);
+  const [photoDone, setPhotoDone] = useState(false);
 
   useEffect(() => {
-  const savedPhoto = localStorage.getItem('dentalPhoto');
-  const apiResult = localStorage.getItem('apiResult');
-  const savedAnswers = localStorage.getItem('quizAnswers');
-  setPhoto(savedPhoto);
+    const savedPhoto = localStorage.getItem('dentalPhoto');
+    const apiResult = localStorage.getItem('apiResult');
+    const savedAnswers = localStorage.getItem('quizAnswers');
+    // sessionStorage check — sirf is session mein quiz ki?
+    const quizDoneThisSession = sessionStorage.getItem('quizDoneThisSession');
 
-  setTimeout(() => {
-    if (apiResult) {
-      // API ka result use karo — real AI prediction
-      try {
-        const parsed = JSON.parse(apiResult);
-        const prediction = parsed.prediction?.toLowerCase();
-        setConfidence(parsed.confidence);
-        setApiUsed(true);
-        if (prediction === 'normal') setResult('normal');
-        else if (prediction === 'mild') setResult('mild');
-        else if (prediction === 'severe') setResult('severe');
-        else setResult('mild');
-      } catch {
+    setPhoto(savedPhoto);
+    setQuizDone(!!quizDoneThisSession);
+    setPhotoDone(!!savedPhoto);
+
+    setTimeout(() => {
+      if (apiResult) {
+        try {
+          const parsed = JSON.parse(apiResult);
+          const prediction = parsed.prediction?.toLowerCase();
+          if (prediction === 'normal') setResult('normal');
+          else if (prediction === 'mild') setResult('mild');
+          else if (prediction === 'severe') setResult('severe');
+          else setResult('mild');
+        } catch {
+          setResult('mild');
+        }
+      } else if (savedAnswers) {
+        const answers = JSON.parse(savedAnswers);
+        const score = calculateScore(answers);
+        if (score <= 4) setResult('normal');
+        else if (score <= 10) setResult('mild');
+        else setResult('severe');
+      } else {
         setResult('mild');
-        setApiUsed(false);
       }
-    } else if (savedAnswers) {
-      // Fallback — quiz score se
-      const answers = JSON.parse(savedAnswers);
-      const score = calculateScore(answers);
-      if (score <= 4) { setResult('normal'); setConfidence(0.78); }
-      else if (score <= 10) { setResult('mild'); setConfidence(0.82); }
-      else { setResult('severe'); setConfidence(0.85); }
-      setApiUsed(false);
-    } else {
-      setResult('mild');
-      setConfidence(0.75);
-      setApiUsed(false);
-    }
-    setLoading(false);
-  }, 3000);
-}, []);
+      setLoading(false);
+    }, 3000);
+  }, []);
+
   const calculateScore = (answers) => {
     let score = 0;
     const severeOptions = ['Well / Borehole Water', 'River / Stream Water', 'Clearly visible white spots', 'White patches on most teeth', 'Moderate brown staining', 'Severe dark brown staining', 'Rough or chalky feeling', 'Pitted or deeply eroded', 'Moderate sensitivity', 'Severe constant sensitivity', 'Frequently', 'Yes, diagnosed'];
@@ -66,10 +64,6 @@ function Results() {
       analyzingDesc: 'Processing AI predictions and quiz answers...',
       yourResult: 'Your Screening Result',
       basedOn: "Based on Dean's Fluorosis Index & TF Index",
-      aiPowered: 'AI-Powered Result',
-      aiModels: 'Analyzed by ResNet50 + VGG-CNN + YOLOv8 Ensemble',
-      quizBased: 'Quiz-Based Result',
-      confidence: 'Confidence',
       normal: { label: 'Normal', desc: 'Your screening indicates no significant signs of dental fluorosis. Your tooth enamel appears to be within the normal range.', action: 'Continue maintaining good dental hygiene. Schedule regular dental checkups every 6 months.', color: '#16a34a', bg: 'rgba(22,163,74,0.06)', border: 'rgba(22,163,74,0.3)' },
       mild: { label: 'Mild Fluorosis', desc: 'Your screening indicates possible mild dental fluorosis. Small opaque white areas may be present on less than 25% of your tooth surface.', action: 'Monitor your dental health and follow our prevention tips. Consider consulting a dentist for a professional evaluation.', color: '#d97706', bg: 'rgba(217,119,6,0.06)', border: 'rgba(217,119,6,0.3)' },
       severe: { label: 'Severe Fluorosis', desc: 'Your screening indicates possible severe dental fluorosis. Significant discoloration or enamel damage may be present.', action: 'We strongly recommend booking a consultation with a dental professional as soon as possible.', color: '#dc2626', bg: 'rgba(220,38,38,0.06)', border: 'rgba(220,38,38,0.3)' },
@@ -89,10 +83,6 @@ function Results() {
       analyzingDesc: 'AI پیشین گوئیاں اور کوئز کے جوابات پر کارروائی ہو رہی ہے...',
       yourResult: 'آپ کا اسکریننگ نتیجہ',
       basedOn: 'ڈین کے فلوروسس انڈیکس اور TF انڈیکس کی بنیاد پر',
-      aiPowered: 'AI پر مبنی نتیجہ',
-      aiModels: 'ResNet50 + VGG-CNN + YOLOv8 نے تجزیہ کیا',
-      quizBased: 'کوئز پر مبنی نتیجہ',
-      confidence: 'اعتماد',
       normal: { label: 'نارمل', desc: 'آپ کی اسکریننگ ڈینٹل فلوروسس کی کوئی اہم علامت نہیں دکھاتی۔', action: 'اچھی دانتوں کی صفائی جاری رکھیں۔ ہر 6 ماہ بعد دانتوں کا معائنہ کروائیں۔', color: '#16a34a', bg: 'rgba(22,163,74,0.06)', border: 'rgba(22,163,74,0.3)' },
       mild: { label: 'ہلکا فلوروسس', desc: 'آپ کی اسکریننگ ہلکے ڈینٹل فلوروسس کی ممکنہ علامات دکھاتی ہے۔', action: 'اپنی دانتوں کی صحت کی نگرانی کریں اور ہماری تجاویز پر عمل کریں۔', color: '#d97706', bg: 'rgba(217,119,6,0.06)', border: 'rgba(217,119,6,0.3)' },
       severe: { label: 'شدید فلوروسس', desc: 'آپ کی اسکریننگ شدید ڈینٹل فلوروسس کی ممکنہ علامات دکھاتی ہے۔', action: 'ہم جلد از جلد دانتوں کے ڈاکٹر سے مشورہ کرنے کی سختی سے سفارش کرتے ہیں۔', color: '#dc2626', bg: 'rgba(220,38,38,0.06)', border: 'rgba(220,38,38,0.3)' },
@@ -162,8 +152,6 @@ function Results() {
         <h1 style={styles.title}>{t.yourResult}</h1>
         <p style={styles.basedOn}>{t.basedOn}</p>
 
-       
-            
         {/* Result Badge */}
         <div style={{ ...styles.resultBadge, borderColor: resultData.border, backgroundColor: resultData.bg }}>
           <div style={styles.resultIconWrapper}>{resultIcons[result]}</div>
@@ -177,22 +165,25 @@ function Results() {
           <p style={styles.actionDesc}>{resultData.action}</p>
         </div>
 
-        {/* Summary */}
-<div style={styles.summaryBox}>
-  <h4 style={styles.summaryTitle}>{t.quizSummary}</h4>
-  {localStorage.getItem('quizAnswers') && (
-    <div style={styles.summaryRow}>
-      <FiCheckCircle size={14} color="#16a34a" />
-      <p style={styles.summaryItem}>{t.quizCompleted}</p>
-    </div>
-  )}
-  {localStorage.getItem('dentalPhoto') && (
-    <div style={styles.summaryRow}>
-      <FiCheckCircle size={14} color="#16a34a" />
-      <p style={styles.summaryItem}>{t.photoAnalyzed}</p>
-    </div>
-  )}
-</div>
+        {/* Summary — sirf woh show hoga jo is session mein hua */}
+        {(quizDone || photoDone) && (
+          <div style={styles.summaryBox}>
+            <h4 style={styles.summaryTitle}>{t.quizSummary}</h4>
+            {quizDone && (
+              <div style={styles.summaryRow}>
+                <FiCheckCircle size={14} color="#16a34a" />
+                <p style={styles.summaryItem}>{t.quizCompleted}</p>
+              </div>
+            )}
+            {photoDone && (
+              <div style={styles.summaryRow}>
+                <FiCheckCircle size={14} color="#16a34a" />
+                <p style={styles.summaryItem}>{t.photoAnalyzed}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Photo Preview */}
         {photo && (
           <div style={styles.photoBox}>
@@ -263,16 +254,6 @@ const styles = {
   logoImg: { height: '70px', objectFit: 'contain', filter: 'drop-shadow(0 2px 6px rgba(255,107,0,0.2))' },
   title: { color: '#1a1a1a', fontSize: '26px', fontWeight: '800', textAlign: 'center', margin: '0 0 8px 0' },
   basedOn: { color: '#999', fontSize: '12px', textAlign: 'center', marginBottom: '16px', fontStyle: 'italic' },
-  aiBadge: {
-    display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap',
-    backgroundColor: 'rgba(0,180,216,0.08)', border: '1.5px solid rgba(0,180,216,0.25)',
-    borderRadius: '10px', padding: '10px 14px', marginBottom: '20px',
-    fontSize: '12px', color: '#00b4d8', fontWeight: '600',
-  },
-  confidenceBadge: {
-    marginLeft: 'auto', backgroundColor: 'rgba(0,180,216,0.15)',
-    padding: '3px 10px', borderRadius: '20px', fontSize: '11px',
-  },
   resultBadge: {
     border: '1.5px solid', borderRadius: '16px', padding: '32px',
     textAlign: 'center', marginBottom: '24px',
