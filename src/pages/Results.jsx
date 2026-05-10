@@ -13,38 +13,38 @@ function Results() {
 
   useEffect(() => {
   const savedPhoto = localStorage.getItem('dentalPhoto');
+  const apiResult = localStorage.getItem('apiResult');
   const savedAnswers = localStorage.getItem('quizAnswers');
   setPhoto(savedPhoto);
 
   setTimeout(() => {
-    if (savedAnswers) {
+    if (apiResult) {
+      // API ka result use karo — real AI prediction
+      try {
+        const parsed = JSON.parse(apiResult);
+        const prediction = parsed.prediction?.toLowerCase();
+        setConfidence(parsed.confidence);
+        setApiUsed(true);
+        if (prediction === 'normal') setResult('normal');
+        else if (prediction === 'mild') setResult('mild');
+        else if (prediction === 'severe') setResult('severe');
+        else setResult('mild');
+      } catch {
+        setResult('mild');
+        setApiUsed(false);
+      }
+    } else if (savedAnswers) {
+      // Fallback — quiz score se
       const answers = JSON.parse(savedAnswers);
       const score = calculateScore(answers);
-      
-      let finalResult;
-      let finalConfidence;
-
-      if (score <= 4) {
-        finalResult = 'normal';
-        finalConfidence = 78;
-      } else if (score <= 10) {
-        finalResult = 'mild';
-        finalConfidence = 82;
-      } else {
-        finalResult = 'severe';
-        finalConfidence = 85;
-      }
-
-      setResult(finalResult);
-      setConfidence(finalConfidence / 100);
+      if (score <= 4) { setResult('normal'); setConfidence(0.78); }
+      else if (score <= 10) { setResult('mild'); setConfidence(0.82); }
+      else { setResult('severe'); setConfidence(0.85); }
       setApiUsed(false);
-      localStorage.setItem('fluoroResult', finalResult);
-      localStorage.setItem('fluoroConfidence', finalConfidence);
     } else {
       setResult('mild');
       setConfidence(0.75);
-      localStorage.setItem('fluoroResult', 'mild');
-      localStorage.setItem('fluoroConfidence', 75);
+      setApiUsed(false);
     }
     setLoading(false);
   }, 3000);
