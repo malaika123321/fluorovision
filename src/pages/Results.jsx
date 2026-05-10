@@ -178,18 +178,21 @@ function Results() {
         </div>
 
         {/* Summary */}
-        <div style={styles.summaryBox}>
-          <h4 style={styles.summaryTitle}>{t.quizSummary}</h4>
-          <div style={styles.summaryRow}>
-            <FiCheckCircle size={14} color="#16a34a" />
-            <p style={styles.summaryItem}>{t.quizCompleted}</p>
-          </div>
-          <div style={styles.summaryRow}>
-            <FiCheckCircle size={14} color="#16a34a" />
-            <p style={styles.summaryItem}>{t.photoAnalyzed}</p>
-          </div>
-        </div>
-
+<div style={styles.summaryBox}>
+  <h4 style={styles.summaryTitle}>{t.quizSummary}</h4>
+  {localStorage.getItem('quizAnswers') && (
+    <div style={styles.summaryRow}>
+      <FiCheckCircle size={14} color="#16a34a" />
+      <p style={styles.summaryItem}>{t.quizCompleted}</p>
+    </div>
+  )}
+  {localStorage.getItem('dentalPhoto') && (
+    <div style={styles.summaryRow}>
+      <FiCheckCircle size={14} color="#16a34a" />
+      <p style={styles.summaryItem}>{t.photoAnalyzed}</p>
+    </div>
+  )}
+</div>
         {/* Photo Preview */}
         {photo && (
           <div style={styles.photoBox}>
