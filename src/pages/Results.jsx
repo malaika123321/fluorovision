@@ -162,19 +162,8 @@ function Results() {
         <h1 style={styles.title}>{t.yourResult}</h1>
         <p style={styles.basedOn}>{t.basedOn}</p>
 
-        {/* AI Badge */}
-        {apiUsed && (
-          <div style={styles.aiBadge}>
-            <FiCpu size={14} color="#00b4d8" />
-            <span>{t.aiPowered} — {t.aiModels}</span>
-            {confidence && (
-              <span style={styles.confidenceBadge}>
-                {t.confidence}: {(confidence * 100).toFixed(1)}%
-              </span>
-            )}
-          </div>
-        )}
-
+       
+            
         {/* Result Badge */}
         <div style={{ ...styles.resultBadge, borderColor: resultData.border, backgroundColor: resultData.bg }}>
           <div style={styles.resultIconWrapper}>{resultIcons[result]}</div>
