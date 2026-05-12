@@ -250,7 +250,7 @@ function PhotoUpload() {
             </div>
             <p style={styles.analyzingDesc}>
               {language === 'EN'
-                ? 'Our AI models (ResNet50, VGG-CNN, YOLOv8) are analyzing your photo...'
+                ? 'Our AI models (ResNet50,MobileNet) are analyzing your photo...'
                 : 'ہمارے AI ماڈلز آپ کی تصویر کا تجزیہ کر رہے ہیں...'}
             </p>
           </div>
